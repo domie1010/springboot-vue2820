@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ZhangjieDao">
+
+
+
+
+
+
+
+
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.shuji_id as shujiId
+        ,a.zhangjie_name as zhangjieName
+        ,a.zhangjie_content as zhangjieContent
+        ,a.paixu as paixu
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ZhangjieView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,shuji.shuji_name as shujiName
+        ,shuji.shuji_photo as shujiPhoto
+        ,shuji.shuji_types as shujiTypes
+        ,shuji.shuji_clicknum as shujiClicknum
+        ,shuji.shangxia_types as shangxiaTypes
+        ,shuji.shuji_content as shujiContent
+
+        FROM zhangjie  a
+        left JOIN shuji shuji ON a.shuji_id = shuji.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.shujiId != null and params.shujiId != ''">
+                and a.shuji_id = #{params.shujiId}
+            </if>
+            <if test=" params.zhangjieName != '' and params.zhangjieName != null and params.zhangjieName != 'null' ">
+                and a.zhangjie_name like CONCAT('%',#{params.zhangjieName},'%')
+            </if>
+            <if test=" params.zhangjieContent != '' and params.zhangjieContent != null and params.zhangjieContent != 'null' ">
+                and a.zhangjie_content like CONCAT('%',#{params.zhangjieContent},'%')
+            </if>
+            <if test="params.paixuStart != null and params.paixuStart != ''">
+                <![CDATA[  and a.paixu >= #{params.paixuStart}   ]]>
+            </if>
+            <if test="params.paixuEnd != null and params.paixuEnd != ''">
+                <![CDATA[  and a.paixu <= #{params.paixuEnd}   ]]>
+            </if>
+             <if test="params.paixu != null and params.paixu != ''">
+                and a.paixu = #{params.paixu}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断书籍的id不为空 -->
+            <if test=" params.shujiIdNotNull != '' and params.shujiIdNotNull != null and params.shujiIdNotNull != 'null' ">
+                and a.shuji_id IS NOT NULL
+            </if>
+            <if test="params.zuozheId != null  and params.zuozheId != ''">
+                and shuji.zuozhe_id = #{params.zuozheId}
+            </if>
+            <if test=" params.shujiName != '' and params.shujiName != null and params.shujiName != 'null' ">
+                and shuji.shuji_name like CONCAT('%',#{params.shujiName},'%')
+            </if>
+            <if test="params.shujiTypes != null  and params.shujiTypes != ''">
+                and shuji.shuji_types = #{params.shujiTypes}
+            </if>
+
+            <if test="params.shujiClicknumStart != null  and params.shujiClicknumStart != '' ">
+                <![CDATA[  and shuji.shuji_clicknum >= #{params.shujiClicknumStart}   ]]>
+            </if>
+            <if test="params.shujiClicknumEnd != null  and params.shujiClicknumEnd != '' ">
+                <![CDATA[  and shuji.shuji_clicknum <= #{params.shujiClicknumEnd}   ]]>
+            </if>
+            <if test="params.shujiClicknum != null  and params.shujiClicknum != '' ">
+                and shuji.shuji_clicknum = #{params.shujiClicknum}
+            </if>
+            <if test="params.shangxiaTypes != null  and params.shangxiaTypes != ''">
+                and shuji.shangxia_types = #{params.shangxiaTypes}
+            </if>
+
+            <if test=" params.shujiContent != '' and params.shujiContent != null and params.shujiContent != 'null' ">
+                and shuji.shuji_content like CONCAT('%',#{params.shujiContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(shuji.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(shuji.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
